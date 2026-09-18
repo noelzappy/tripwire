@@ -9,7 +9,7 @@
  * an injection on cue, which a real model usually won't do on demand.
  */
 import { anthropic } from "@ai-sdk/anthropic";
-import { generateText, simulateReadableStream, streamText, wrapLanguageModel, type LanguageModel } from "ai";
+import { generateText, simulateReadableStream, streamText, wrapLanguageModel } from "ai";
 import { MockLanguageModelV4 } from "ai/test";
 import { JsonlLog, loadPolicy, tripwire, type Verdict } from "@noelzappy/tripwire";
 
@@ -29,7 +29,7 @@ const middleware = tripwire({
 });
 const alerts: Verdict[] = [];
 
-const base: LanguageModel = process.env.ANTHROPIC_API_KEY ? anthropic("claude-sonnet-5") : scriptedModel();
+const base = process.env.ANTHROPIC_API_KEY ? anthropic("claude-sonnet-5") : scriptedModel();
 const model = wrapLanguageModel({ model: base, middleware });
 console.log(`model: ${process.env.ANTHROPIC_API_KEY ? "claude-sonnet-5" : "scripted (offline)"}\n`);
 

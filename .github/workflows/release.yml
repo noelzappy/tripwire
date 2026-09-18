@@ -31,7 +31,12 @@ jobs:
 
       - run: npm install -g npm@latest   # trusted publishing needs npm >= 11.5.1
       - run: bun install --frozen-lockfile
-      # prepublishOnly runs typecheck, bun test and the Node smoke test (which builds dist/).
+      - run: bun install --frozen-lockfile   # the root typecheck includes the example
+        working-directory: examples/support-bot
+      # Build before `npm publish`: npm validates `bin` before prepublishOnly runs,
+      # and silently drops the tripwire-proxy bin if dist/proxy.js doesn't exist yet.
+      - run: bun run build
+      # prepublishOnly runs typecheck, bun test and the Node smoke test.
       - run: npm publish
 
       - name: GitHub release
