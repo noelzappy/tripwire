@@ -1,0 +1,25 @@
+{
+  "name": "tripwire",
+  "version": "0.1.0",
+  "description": "Judge every LLM response before the user sees it. AI SDK middleware and OpenAI-compatible proxy on TypeSafe's Jev.",
+  "type": "module",
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "proxy": "bun run src/proxy.ts",
+    "eval": "bun run eval/run.ts",
+    "test": "bun test",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "dependencies": {
+    "@ai-sdk/provider": "^4.0.17",
+    "@ai-sdk/typesafe-ai": "^3.0.2",
+    "ai": "^7.0.103"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.8.3"
+  }
+}

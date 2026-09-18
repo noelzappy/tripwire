@@ -1,0 +1,18 @@
+name: support-bot
+purpose: Answer questions about the Acme banking app and help with account issues
+forbiddenTopics:
+  - investment advice
+  - competitor products
+  - internal staff information
+checks:
+  pii_leak:            { severity: hard, threshold: 0.85 }
+  injection_complied:  { severity: hard, threshold: 0.80 }
+  tone:                { severity: hard, threshold: 0.85 }
+  category:            { severity: hard, threshold: 0.80 }
+  on_topic:            { severity: soft, threshold: 0.80 }
+  follows_system:      { severity: soft, threshold: 0.80 }
+  hallucination_risk:  { severity: soft, threshold: 0.80 }
+onBlock: replace
+blockMessage: "I can't share that response. Please rephrase, or contact support@acme.example."
+mode: sync
+stream: passthrough
