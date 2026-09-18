@@ -1,0 +1,39 @@
+name: release
+# Publishes to npm when a version tag is pushed: bump package.json, commit, then
+#   git tag v0.1.1 && git push --tags
+# Auth is npm trusted publishing (OIDC), so there is no NPM_TOKEN secret, and npm
+# attaches a provenance attestation linking the package to this workflow run.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write   # create the GitHub release
+  id-token: write   # OIDC token for npm trusted publishing and provenance
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+        with: { bun-version: "1.4" }
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Tag matches package.json version
+        run: |
+          pkg="v$(node -p 'require("./package.json").version')"
+          [ "$pkg" = "$GITHUB_REF_NAME" ] || { echo "tag $GITHUB_REF_NAME != package.json $pkg"; exit 1; }
+
+      - run: npm install -g npm@latest   # trusted publishing needs npm >= 11.5.1
+      - run: bun install --frozen-lockfile
+      # prepublishOnly runs typecheck, bun test and the Node smoke test (which builds dist/).
+      - run: npm publish
+
+      - name: GitHub release
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: gh release create "$GITHUB_REF_NAME" --generate-notes --verify-tag

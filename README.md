@@ -1,5 +1,7 @@
 # tripwire
 
+[![npm](https://img.shields.io/npm/v/@noelzappy/tripwire)](https://www.npmjs.com/package/@noelzappy/tripwire) [![ci](https://github.com/noelzappy/tripwire/actions/workflows/ci.yml/badge.svg)](https://github.com/noelzappy/tripwire/actions/workflows/ci.yml)
+
 Judge every LLM response before the user sees it. Seven checks in one ~100 ms call to [TypeSafe's Jev](https://typesafe.ai), cheap enough to run on 100% of traffic instead of sampling 1% with a frontier judge.
 
 - **AI SDK middleware**: `wrapLanguageModel({ model, middleware: tripwire(...) })`. Zero infra.
