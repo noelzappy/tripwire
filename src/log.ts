@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { appendFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import type { Verdict } from "./verdict.ts";
@@ -39,5 +40,5 @@ export class MemoryLog implements DecisionLog {
 export const noopLog: DecisionLog = { write() {} };
 
 export function hashState(state: string): string {
-  return new Bun.CryptoHasher("sha256").update(state).digest("hex").slice(0, 16);
+  return createHash("sha256").update(state).digest("hex").slice(0, 16);
 }

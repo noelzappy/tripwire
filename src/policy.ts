@@ -3,6 +3,8 @@
  * counts, and what a `block` does to the response. Load from YAML/JSON or
  * build in code. Unknown keys are rejected so typos don't silently disable a check.
  */
+import { readFile } from "node:fs/promises";
+import { parse as parseYaml } from "yaml";
 
 export type CheckId =
   | "on_topic"
@@ -82,9 +84,9 @@ export function definePolicy(partial: PolicyInput): Policy {
   return p;
 }
 
-/** Load a .yaml/.yml/.json policy file. Uses Bun's built-in YAML parser. */
+/** Load a .yaml/.yml/.json policy file. */
 export async function loadPolicy(path: string): Promise<Policy> {
-  const text = await Bun.file(path).text();
-  const raw = /\.ya?ml$/.test(path) ? (Bun as any).YAML.parse(text) : JSON.parse(text);
+  const text = await readFile(path, "utf8");
+  const raw = /\.ya?ml$/.test(path) ? parseYaml(text) : JSON.parse(text);
   return definePolicy(raw);
 }

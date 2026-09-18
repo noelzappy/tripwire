@@ -1,25 +1,48 @@
 {
-  "name": "tripwire",
+  "name": "@noelzappy/tripwire",
   "version": "0.1.0",
   "description": "Judge every LLM response before the user sees it. AI SDK middleware and OpenAI-compatible proxy on TypeSafe's Jev.",
+  "keywords": ["ai", "llm", "guardrails", "ai-sdk", "middleware", "moderation", "pii", "prompt-injection", "jev", "typesafe"],
   "type": "module",
   "license": "MIT",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "exports": { ".": "./src/index.ts" },
+  "author": "Emmanuel <noelzappy@gmail.com>",
+  "repository": { "type": "git", "url": "git+https://github.com/noelzappy/tripwire.git" },
+  "homepage": "https://github.com/noelzappy/tripwire#readme",
+  "bugs": "https://github.com/noelzappy/tripwire/issues",
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
+  "bin": { "tripwire-proxy": "./dist/proxy.js" },
+  "files": ["dist", "src", "policies", "README.md", "LICENSE"],
+  "sideEffects": false,
+  "engines": { "node": ">=20" },
+  "publishConfig": { "access": "public" },
   "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "proxy": "bun run src/proxy.ts",
     "eval": "bun run eval/run.ts",
     "test": "bun test",
-    "typecheck": "bunx tsc --noEmit"
+    "test:node": "bun run build && node test/node-smoke.mjs",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "bun run typecheck && bun test && bun run test:node"
   },
   "dependencies": {
     "@ai-sdk/provider": "^4.0.17",
     "@ai-sdk/typesafe-ai": "^3.0.2",
+    "yaml": "^2.9.1"
+  },
+  "peerDependencies": {
     "ai": "^7.0.103"
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "ai": "^7.0.103",
     "typescript": "^5.8.3"
   }
 }

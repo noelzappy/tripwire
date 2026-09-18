@@ -21,7 +21,7 @@ export class MockJudge implements Judge {
       (answers as any)[id] = a;
       (confidence as any)[id] = 0.9;
     }
-    if (this.latencyMs) await Bun.sleep(this.latencyMs);
+    if (this.latencyMs) await new Promise((r) => setTimeout(r, this.latencyMs));
     return { answers, confidence, latencyMs: this.latencyMs, inputTokens: Math.round(state.length / 4), judge: this.name };
   }
 }

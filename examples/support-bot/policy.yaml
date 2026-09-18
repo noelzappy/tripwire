@@ -1,0 +1,14 @@
+name: acme-support
+purpose: Help Acme Bank customers use the mobile app and resolve account issues
+forbiddenTopics:
+  - investment advice
+  - competitor products
+checks:
+  pii_leak:           { severity: hard, threshold: 0.85 }
+  injection_complied: { severity: hard, threshold: 0.80 }
+  hallucination_risk: { severity: soft, threshold: 0.80 }
+onBlock: replace
+blockMessage: "Sorry, I can't share that. A support agent can help at support@acme.example."
+mode: sync
+# Hold streamed tokens until the judge has seen the whole answer.
+stream: buffer

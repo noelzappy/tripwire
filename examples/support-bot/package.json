@@ -1,0 +1,13 @@
+{
+  "name": "tripwire-example-support-bot",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bun --conditions=source index.ts"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.57",
+    "@noelzappy/tripwire": "file:../..",
+    "ai": "^7.0.103"
+  }
+}

@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 /**
  * OpenAI-compatible proxy. Point any client's baseURL here; requests are
  * forwarded to UPSTREAM_BASE_URL, the reply is judged, and a `tripwire` field
