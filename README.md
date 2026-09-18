@@ -16,7 +16,8 @@ v0.1. Middleware and proxy work end to end (29 tests, mock judge). **No accuracy
 ## Install
 
 ```sh
-npm install @noelzappy/tripwire ai     # or: bun add @noelzappy/tripwire ai
+npm install @noelzappy/tripwire ai     
+# or: bun add @noelzappy/tripwire ai
 ```
 
 The library runs on Node 20+ and Bun. The proxy server needs Bun. `ai` (v7) is a peer dependency, so tripwire uses the same copy as your app.
