@@ -1,6 +1,6 @@
 {
   "name": "@noelzappy/tripwire",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Judge every LLM response before the user sees it. AI SDK middleware and OpenAI-compatible proxy on TypeSafe's Jev.",
   "keywords": [
     "ai",
