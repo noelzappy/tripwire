@@ -1,12 +1,26 @@
 {
   "name": "@noelzappy/tripwire",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Judge every LLM response before the user sees it. AI SDK middleware and OpenAI-compatible proxy on TypeSafe's Jev.",
-  "keywords": ["ai", "llm", "guardrails", "ai-sdk", "middleware", "moderation", "pii", "prompt-injection", "jev", "typesafe"],
+  "keywords": [
+    "ai",
+    "llm",
+    "guardrails",
+    "ai-sdk",
+    "middleware",
+    "moderation",
+    "pii",
+    "prompt-injection",
+    "jev",
+    "typesafe"
+  ],
   "type": "module",
   "license": "MIT",
   "author": "Emmanuel <noelzappy@gmail.com>",
-  "repository": { "type": "git", "url": "git+https://github.com/noelzappy/tripwire.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/noelzappy/tripwire.git"
+  },
   "homepage": "https://github.com/noelzappy/tripwire#readme",
   "bugs": "https://github.com/noelzappy/tripwire/issues",
   "exports": {
@@ -18,11 +32,23 @@
     "./package.json": "./package.json"
   },
   "types": "./dist/index.d.ts",
-  "bin": { "tripwire-proxy": "./dist/proxy.js" },
-  "files": ["dist", "src", "policies", "README.md", "LICENSE"],
+  "bin": {
+    "tripwire-proxy": "./dist/proxy.js"
+  },
+  "files": [
+    "dist",
+    "src",
+    "policies",
+    "README.md",
+    "LICENSE"
+  ],
   "sideEffects": false,
-  "engines": { "node": ">=20" },
-  "publishConfig": { "access": "public" },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "proxy": "bun run src/proxy.ts",
