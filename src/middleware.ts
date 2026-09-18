@@ -20,6 +20,8 @@ import type { Verdict } from "./verdict.ts";
  *   stream (buffer): hold every part until the stream ends and the judge returns,
  *     then release them (or the replacement). Loses streaming, keeps enforcement.
  *
+ * Responses with no text (tool-call-only turns) are not judged and carry no verdict.
+ *
  * The verdict is always attached at providerMetadata.tripwire.
  */
 export function tripwire(opts: TripwireOptions | Tripwire = {}): LanguageModelV4Middleware {
@@ -32,10 +34,11 @@ export function tripwire(opts: TripwireOptions | Tripwire = {}): LanguageModelV4
     async wrapGenerate({ doGenerate, params }) {
       const result = await doGenerate();
       const text = textOf(result.content);
+      if (!text.trim()) return result; // tool-call-only turn: nothing for the judge to read
       const exchange = exchangeFrom(params, text);
 
       if (policy.mode === "async") {
-        void tw.check(exchange);
+        tw.checkInBackground(exchange);
         return result;
       }
       const v = await tw.check(exchange);
@@ -55,9 +58,10 @@ export function tripwire(opts: TripwireOptions | Tripwire = {}): LanguageModelV4
           else controller.enqueue(part);
         },
         async flush(controller) {
+          if (!text.trim()) { for (const p of held) controller.enqueue(p); return; }
           const exchange = exchangeFrom(params, text);
           if (policy.mode === "async") {
-            void tw.check(exchange);
+            tw.checkInBackground(exchange);
             return;
           }
           const v = await tw.check(exchange);

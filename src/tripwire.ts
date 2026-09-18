@@ -71,10 +71,20 @@ export class Tripwire {
       stateHash: hashState(state),
       ...(this.opts.storeBodies ? { bodies: { userMessage: exchange.userMessage, response: exchange.response } } : {}),
     };
-    this.log.write(rec);
-    this.opts.onVerdict?.(verdict, exchange);
+    // The log and onVerdict are telemetry: their failures are reported, never allowed to break the response.
+    try { this.log.write(rec); } catch (err) { report("decision log write failed", err); }
+    try { this.opts.onVerdict?.(verdict, exchange); } catch (err) { report("onVerdict threw", err); }
     return verdict;
   }
+
+  /** Fire-and-forget check for async mode. Anything that escapes check() (e.g. a throwing onJudgeError) is reported, not left unhandled. */
+  checkInBackground(x: Exchange): void {
+    this.check(x).catch((err) => report("background check failed", err));
+  }
+}
+
+function report(what: string, err: unknown) {
+  console.error(`[tripwire] ${what}:`, err instanceof Error ? err.message : err);
 }
 
 /** Jev when a key is present or TRIPWIRE_JUDGE=jev, otherwise the mock, loudly. */

@@ -101,6 +101,40 @@ describe("tripwire middleware", () => {
     expect(log.records[0]!.verdict).toBe("block");
   });
 
+  test("a failing decision log does not break the response", async () => {
+    const log = { write() { throw new Error("disk full"); } };
+    const m = wrapLanguageModel({ model: model(CLEAN), middleware: tripwire({ judge: new MockJudge(), log }) });
+    const r = await generateText({ model: m, system: SYSTEM, prompt: "x" });
+    expect((r.providerMetadata as any).tripwire.verdict).toBe("pass");
+  });
+
+  test("async mode reports a throwing onJudgeError instead of leaving it unhandled", async () => {
+    const broken = { name: "broken", judge: async () => { throw new Error("boom"); } };
+    const errors: unknown[] = [];
+    const orig = console.error;
+    console.error = (...a: unknown[]) => { errors.push(a); };
+    try {
+      const onJudgeError = () => { throw new Error("fail closed"); };
+      const m = wrapLanguageModel({ model: model(CLEAN), middleware: tripwire({ judge: broken, onJudgeError, policy: definePolicy({ mode: "async" }) }) });
+      const r = await generateText({ model: m, system: SYSTEM, prompt: "x" });
+      expect(r.text).toBe(CLEAN);
+      await Bun.sleep(20);
+    } finally {
+      console.error = orig;
+    }
+    expect(JSON.stringify(errors)).toContain("background check failed");
+  });
+
+  test("tool-call-only generate is not judged", async () => {
+    const log = new MemoryLog();
+    const toolOnly = new MockLanguageModelV4({
+      doGenerate: async () => ({ content: [{ type: "tool-call", toolCallId: "t1", toolName: "lookup", input: "{}" }], finishReason: "tool-calls", usage, warnings: [] }) as any,
+    });
+    const m = wrapLanguageModel({ model: toolOnly, middleware: tripwire({ judge: new MockJudge(), log }) });
+    await generateText({ model: m, system: SYSTEM, prompt: "x" });
+    expect(log.records).toHaveLength(0);
+  });
+
   test("judge failure fails open with flag", async () => {
     const broken = { name: "broken", judge: async () => { throw new Error("boom"); } };
     const m = wrapLanguageModel({ model: model(CLEAN), middleware: tripwire({ judge: broken }) });

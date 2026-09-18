@@ -1,4 +1,5 @@
 export { tripwire, exchangeFrom } from "./middleware.ts";
+export { createProxy, type ProxyOptions } from "./proxy.ts";
 export { Tripwire, TripwireBlockedError, defaultJudge, type TripwireOptions } from "./tripwire.ts";
 export { definePolicy, loadPolicy, DEFAULT_POLICY, type Policy, type PolicyInput, type CheckId, type CheckConfig } from "./policy.ts";
 export { buildQuestions } from "./checks.ts";

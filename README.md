@@ -11,7 +11,7 @@ Judge every LLM response before the user sees it. Seven checks in one ~100 ms ca
 
 ## Status
 
-v0.1. Middleware and proxy work end to end (19 tests, mock judge). **No accuracy numbers against real Jev yet.** The eval harness and a 27-item seed set exist so the first real run is one command. Do not put this in front of users until that run shows block precision above 95% on your own data.
+v0.1. Middleware and proxy work end to end (29 tests, mock judge). **No accuracy numbers against real Jev yet.** The eval harness and a 27-item seed set exist so the first real run is one command. Do not put this in front of users until that run shows block precision above 95% on your own data.
 
 ## Quick start
 
@@ -57,6 +57,10 @@ UPSTREAM_BASE_URL=https://api.openai.com/v1 TRIPWIRE_POLICY=policies/default.yam
 
 The JSON reply gains a `tripwire` field. On block: `replace` swaps the content, `throw` returns HTTP 451 with the verdict, `annotate` leaves it. Streaming requests are served as a single SSE chunk after judging (v0.1 trade-off; token-level streaming through the proxy is on the list).
 
+Every choice is judged. With `n > 1`, each choice carries its own `tripwire` verdict, only blocked choices are replaced, and the top-level `tripwire` is the most severe one. Choices with no text (tool calls only) are not judged; their `tripwire` is `null`.
+
+**Auth.** By default the proxy forwards the client's own `Authorization` header upstream, so it holds no secrets. If you set `UPSTREAM_API_KEY` so the proxy spends its own key, you must also set `TRIPWIRE_PROXY_KEY`; clients then send `Authorization: Bearer $TRIPWIRE_PROXY_KEY` and anything else gets a 401. The proxy refuses to start with an upstream key and no proxy key. `/health` is always open. To embed the handler in your own server, use `createProxy({ tripwire, upstream, upstreamKey, proxyKey })`.
+
 ## The checks
 
 | Check | Jev primitive | Fires when | Default severity |
@@ -97,7 +101,9 @@ Unknown keys and check names throw at load time. Thresholds are per check and sh
 
 ## Failure behaviour
 
-If Jev is unreachable or errors, tripwire **fails open**: the response goes through with `verdict: "flag"` and an empty `checks` map, and the error is logged. Override with `onJudgeError` if you want fail-closed.
+If Jev is unreachable or errors, tripwire **fails open**: the response goes through with `verdict: "flag"` and an empty `checks` map, and the error is logged. Override with `onJudgeError` if you want fail-closed; in sync mode an error thrown from it propagates to the caller.
+
+The decision log and `onVerdict` are telemetry: if either throws, the error goes to stderr and the response is unaffected. In async mode nothing the background check does can surface as an unhandled rejection; failures are reported to stderr.
 
 ## Eval
 
@@ -130,13 +136,14 @@ src/verdict.ts       answers + confidence -> pass | flag | block
 src/policy.ts        schema, defaults, YAML loader
 src/tripwire.ts      core: check(exchange) -> verdict, logging, fail-open
 src/middleware.ts    AI SDK LanguageModelV4Middleware
-src/proxy.ts         Bun.serve OpenAI-compatible proxy
+src/proxy.ts         OpenAI-compatible proxy: createProxy() handler, Bun.serve when run directly
 eval/run.ts          eval CLI
 ```
 
 ## Known limits
 
 - Jev sees text only; `hallucination_risk` is a heuristic about unsupported specifics, not fact-checking.
+- Responses with no text (tool-call-only turns) are not judged, in the middleware or the proxy; tool-call arguments are not inspected.
 - Prompt-injection detection is adversarial. This is one layer.
 - ~32k token state budget; long system prompts and histories are trimmed (oldest first).
 - Jev launched 15 Sep 2026 and is in early access; its API, limits and pricing can change. Everything provider-specific is behind `Judge`.
